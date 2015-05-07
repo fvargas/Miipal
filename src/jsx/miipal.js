@@ -1,18 +1,3 @@
-var felipe = {
-  name: 'Felipe',
-  messages: ['Ohaio', 'der', 'p']
-}
-var poShen = {
-  name: 'Po-Shen',
-  messages: ['Hello', 'there', '!']
-}
-var will = {
-  name: 'Will',
-  messages: [':)', ':D']
-}
-var people = [felipe, poShen, will];
-
-
 var NameForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
@@ -21,7 +6,7 @@ var NameForm = React.createClass({
     if (!name)
       return;
 
-    // Perform registration actions
+    this.props.onRegister(name);
   },
   render: function() {
     return (
@@ -36,38 +21,33 @@ var NameForm = React.createClass({
 var NameLabel = React.createClass({
   render: function() {
     return (
-      <h3>{this.props.name}</h3>
+      <h3>Hi {this.props.name}!</h3>
     );
   }
 });
 
 var UserSelectForm = React.createClass({
-  /*getInitialState: function() {
-    return {users: []};
-  },
-  refreshUsers: function() {
-    this.setState({users: ['Felipe', 'Po-Shen', 'Will']});
-  },
-  componentDidMount: function() {
-    this.refreshUsers();
-  },*/
   handleSubmit: function(e) {
     e.preventDefault();
     
     var selectedUser = React.findDOMNode(this.refs.user).value;
+    // Do nothing if user selected the default option
+    if (!selectedUser)
+      return;
+
     this.props.onNewConversation(selectedUser);
   },
   render: function() {
-    console.log(this.props.users);
-    var users = this.props.users.map(function(user) {
+    var users = this.props.users.map(function(user, index) {
       return (
-        <option value={user}>{user}</option>
+        <option key={index} value={user}>{user}</option>
       );
     });
     return (
-      <form className="userSelectForm" onSubmit={this.handleSubmit}>
+      <form className="userSelectForm" onChange={this.handleSubmit}>
         <label htmlFor="user">Start a Conversation</label>
-        <select id="user" ref="user">
+        <select id="user" ref="user" defaultValue="">
+          <option value="">Select a user...</option>
           {users}
         </select>
       </form>
@@ -79,7 +59,7 @@ var ChatBar = React.createClass({
   render: function() {
     return (
       <div className="chatBar">
-        {this.props.name ? <NameLabel name={this.props.name} /> : <NameForm />}
+        {this.props.name ? <NameLabel name={this.props.name} /> : <NameForm onRegister={this.props.onRegister} />}
         <UserSelectForm users={this.props.users} onNewConversation={this.props.handleNewConversation} />
       </div>
     );
@@ -88,18 +68,37 @@ var ChatBar = React.createClass({
 
 var ChatMessages = React.createClass({
   render: function() {
+    var messageNodes = this.props.messages.map(function(message, index) {
+      return (
+        <div key={index}>
+          {message}
+        </div>
+      );
+    });
+
     return (
       <div className="chatMessages">
-        {this.props.messages}
+        {messageNodes}
       </div>
     );
   }
 });
 
 var ChatInputForm = React.createClass({
+  handleSubmit: function(e) {
+    e.preventDefault();
+
+    var message = React.findDOMNode(this.refs.message).value.trim();
+    // If empty message do nothing
+    if (!message)
+      return;
+
+    this.props.onMessageSubmit(message);
+    React.findDOMNode(this.refs.message).value = '';
+  },
   render: function() {
     return (
-      <form className="chatInputForm">
+      <form className="chatInputForm" onSubmit={this.handleSubmit}>
         <input type="text" placeholder="Enter your message..." ref="message" />
       </form>
     );
@@ -107,36 +106,76 @@ var ChatInputForm = React.createClass({
 });
 
 var ChatBox = React.createClass({
+  getMessages: function() {
+    if (isStorageSupported() && (messages = localStorage.getItem(this.props.name)))
+      return JSON.parse(messages);
+    else
+      return [];
+  },
+  getInitialState: function() {
+    return {messages: this.getMessages()};
+  },
+  handleMessageSubmit: function(message) {
+    var messageList = this.state.messages.slice();
+    messageList.push(message);
+    this.setState({messages: messageList});
+
+    if (isStorageSupported()) {
+      localStorage.setItem(this.props.name, JSON.stringify(messageList));
+    }
+  },
   render: function() {
     return (
       <div className="chatBox">
         <h2>{this.props.name}</h2>
-        <ChatMessages messages={this.props.messages} />
-        <ChatInputForm />
+        <ChatMessages messages={this.state.messages} />
+        <ChatInputForm onMessageSubmit={this.handleMessageSubmit} />
       </div>
     );
   }
 });
 
 var ChatSystem = React.createClass({
+  getName: function() {
+    if (isStorageSupported() && localStorage.name)
+      return localStorage.name;
+
+    // Local storage not supported or user not registered
+    return '';
+  },
+  fetchUserList: function() {
+    return ['Elon', 'Steve', 'Tesla'];
+  },
+  getInitialState: function() {
+    return {
+      name: this.getName(),
+      users: this.fetchUserList(),
+      conversations: []
+    }
+  },
+  registerUser: function(name) {
+    if (isStorageSupported()) {
+      localStorage.name = name;
+      this.setState({name: name});
+    }
+  },
   handleNewConversation: function(user) {
-    // handle new convo with user
+    var newList = this.state.conversations.slice();
+    newList.push(user);
+    this.setState({conversations: newList});
   },
   render: function() {
-    var users = people.map(function(person) {
+    var chatBoxes = this.state.conversations.map(function(person, index) {
       return (
-        person.name
-      );
-    });
-    var chatBoxes = people.map(function(person) {
-      return (
-        <ChatBox name={person.name} messages={person.messages} />
+        <ChatBox key={index} name={person} />
       );
     });
     return (
       <div className="chatSystem">
         <h1>Miipal</h1>
-        <ChatBar users={users} handleNewConversation={this.handleNewConversation} />
+        <ChatBar name={this.state.name} users={this.state.users}
+                 onRegister={this.registerUser}
+                 handleNewConversation={this.handleNewConversation} />
         {chatBoxes}
       </div>
     );
@@ -147,3 +186,10 @@ React.render(
   <ChatSystem />,
   document.getElementById('content')
 );
+
+/**
+ * Determine if local storage is supported.
+ */
+function isStorageSupported() {
+  return typeof(Storage) !== 'undefined';
+}

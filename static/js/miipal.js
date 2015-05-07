@@ -1,3 +1,5 @@
+var STORAGE_NAME_KEY = '_name';
+
 var NameForm = React.createClass({displayName: "NameForm",
   handleSubmit: function(e) {
     e.preventDefault();
@@ -137,8 +139,8 @@ var ChatBox = React.createClass({displayName: "ChatBox",
 
 var ChatSystem = React.createClass({displayName: "ChatSystem",
   getName: function() {
-    if (isStorageSupported() && localStorage.name)
-      return localStorage.name;
+    if (isStorageSupported() && (name = localStorage.getItem(STORAGE_NAME_KEY)))
+      return name;
 
     // Local storage not supported or user not registered
     return '';
@@ -154,12 +156,19 @@ var ChatSystem = React.createClass({displayName: "ChatSystem",
     }
   },
   registerUser: function(name) {
+    // Invalid name matches 
+    if (name === STORAGE_NAME_KEY)
+      return;
     if (isStorageSupported()) {
-      localStorage.name = name;
+      localStorage.setItem(STORAGE_NAME_KEY, name);
       this.setState({name: name});
     }
   },
   handleNewConversation: function(user) {
+    // User has invalid name
+    if (user === STORAGE_NAME_KEY)
+      return;
+
     var newList = this.state.conversations.slice();
     newList.push(user);
     this.setState({conversations: newList});

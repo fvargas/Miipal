@@ -1,3 +1,18 @@
+var felipe = {
+  name: 'Felipe',
+  messages: ['Ohaio', 'der', 'p']
+}
+var poShen = {
+  name: 'Po-Shen',
+  messages: ['Hello', 'there', '!']
+}
+var will = {
+  name: 'Will',
+  messages: [':)', ':D']
+}
+var people = [felipe, poShen, will];
+
+
 var NameForm = React.createClass({displayName: "NameForm",
   handleSubmit: function(e) {
     e.preventDefault();
@@ -27,7 +42,7 @@ var NameLabel = React.createClass({displayName: "NameLabel",
 });
 
 var UserSelectForm = React.createClass({displayName: "UserSelectForm",
-  getInitialState: function() {
+  /*getInitialState: function() {
     return {users: []};
   },
   refreshUsers: function() {
@@ -35,15 +50,16 @@ var UserSelectForm = React.createClass({displayName: "UserSelectForm",
   },
   componentDidMount: function() {
     this.refreshUsers();
-  },
+  },*/
   handleSubmit: function(e) {
     e.preventDefault();
     
-    var selectedUser = document.getElementById('user').value;
+    var selectedUser = React.findDOMNode(this.refs.user).value;
     this.props.onNewConversation(selectedUser);
   },
   render: function() {
-    var users = this.state.users.map(function(user) {
+    console.log(this.props.users);
+    var users = this.props.users.map(function(user) {
       return (
         React.createElement("option", {value: user}, user)
       );
@@ -51,7 +67,7 @@ var UserSelectForm = React.createClass({displayName: "UserSelectForm",
     return (
       React.createElement("form", {className: "userSelectForm", onSubmit: this.handleSubmit}, 
         React.createElement("label", {htmlFor: "user"}, "Start a Conversation"), 
-        React.createElement("select", {id: "user"}, 
+        React.createElement("select", {id: "user", ref: "user"}, 
           users
         )
       )
@@ -63,8 +79,8 @@ var ChatBar = React.createClass({displayName: "ChatBar",
   render: function() {
     return (
       React.createElement("div", {className: "chatBar"}, 
-        this.props.name ? React.createElement(NameLabel, {name: "Felipe"}) : React.createElement(NameForm, null), 
-        React.createElement(UserSelectForm, {onNewConversation: this.props.handleNewConversation})
+        this.props.name ? React.createElement(NameLabel, {name: this.props.name}) : React.createElement(NameForm, null), 
+        React.createElement(UserSelectForm, {users: this.props.users, onNewConversation: this.props.handleNewConversation})
       )
     );
   }
@@ -74,8 +90,7 @@ var ChatMessages = React.createClass({displayName: "ChatMessages",
   render: function() {
     return (
       React.createElement("div", {className: "chatMessages"}, 
-        "//print messages" + ' ' +
-        "Messages be here"
+        this.props.messages
       )
     );
   }
@@ -95,8 +110,8 @@ var ChatBox = React.createClass({displayName: "ChatBox",
   render: function() {
     return (
       React.createElement("div", {className: "chatBox"}, 
-        React.createElement("h2", null, "Po-Shen"), 
-        React.createElement(ChatMessages, null), 
+        React.createElement("h2", null, this.props.name), 
+        React.createElement(ChatMessages, {messages: this.props.messages}), 
         React.createElement(ChatInputForm, null)
       )
     );
@@ -104,14 +119,25 @@ var ChatBox = React.createClass({displayName: "ChatBox",
 });
 
 var ChatSystem = React.createClass({displayName: "ChatSystem",
+  handleNewConversation: function(user) {
+    // handle new convo with user
+  },
   render: function() {
+    var users = people.map(function(person) {
+      return (
+        person.name
+      );
+    });
+    var chatBoxes = people.map(function(person) {
+      return (
+        React.createElement(ChatBox, {name: person.name, messages: person.messages})
+      );
+    });
     return (
       React.createElement("div", {className: "chatSystem"}, 
         React.createElement("h1", null, "Miipal"), 
-        React.createElement(ChatBar, null), 
-        React.createElement(ChatBox, null), 
-        React.createElement(ChatBox, null), 
-        React.createElement(ChatBox, null)
+        React.createElement(ChatBar, {users: users, handleNewConversation: this.handleNewConversation}), 
+        chatBoxes
       )
     );
   }

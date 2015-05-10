@@ -152,7 +152,7 @@ var ChatBox = React.createClass({displayName: "ChatBox",
   },
   render: function() {
     return (
-      React.createElement("div", {className: "chatBox panel panel-default"}, 
+      React.createElement("div", {className: "chatBox panel panel-primary"}, 
         React.createElement("div", {className: "panel-heading"}, 
           React.createElement("span", {className: "panel-title"}, this.props.friendName)
         ), 

@@ -1,7 +1,17 @@
-.chatBox {
-    width: 19vw;
+.chatBox .panel-body {
+  height: 30vh;
 }
 
-.chatBox .panel-body {
-    height: 30vh;
+.chatBox .panel-footer {
+  background-color: #fff;
+  padding: 0;
+}
+
+.chatInputForm input {
+  border: none;
+  box-shadow: none;
+}
+
+.chatInputForm input:focus {
+  box-shadow: none;
 }

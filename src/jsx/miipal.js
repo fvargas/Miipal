@@ -250,9 +250,11 @@ var ChatSystem = React.createClass({
     if (user === STORAGE_NAME_KEY)
       return;
 
-    var newList = this.state.conversations.slice();
-    newList.push(user);
-    this.setState({conversations: newList});
+    if (this.state.conversations.indexOf(user) < 0) {
+      var newList = this.state.conversations.slice();
+      newList.push(user);
+      this.setState({conversations: newList});
+    }
   },
   render: function() {
     var myName = this.state.name;

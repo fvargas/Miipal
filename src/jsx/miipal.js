@@ -109,7 +109,7 @@ var ChatInputForm = React.createClass({
 
 var ChatBox = React.createClass({
   getMessages: function() {
-    if (isStorageSupported() && (messages = localStorage.getItem(this.props.name)))
+    if (isStorageSupported() && (messages = localStorage.getItem(this.props.friendName)))
       return JSON.parse(messages);
     else
       return [];
@@ -122,14 +122,18 @@ var ChatBox = React.createClass({
     newMessageList.push(message);
     this.setState({messages: newMessageList});
 
+    // Store the new message
     if (isStorageSupported()) {
-      localStorage.setItem(this.props.name, JSON.stringify(newMessageList));
+      localStorage.setItem(this.props.friendName, JSON.stringify(newMessageList));
     }
+
+    // Send the message to the server
+    sendMessage(this.props.myName, this.props.friendName, message);
   },
   render: function() {
     return (
       <div className="chatBox">
-        <h2>{this.props.name}</h2>
+        <h2>{this.props.friendName}</h2>
         <ChatMessages messages={this.state.messages} />
         <ChatInputForm onMessageSubmit={this.handleMessageSubmit} />
       </div>
@@ -172,6 +176,28 @@ var ChatSystem = React.createClass({
     var users = data['user_list'];
     this.setState({users, users});
   },
+  newMessage: function(data) {
+    var sender = data.sender;
+    var message = data.message;
+
+    if (this.state.conversations.indexOf(sender) < 0) {
+      var newConversations = this.state.conversations.slice();
+      newConversations.push(sender);
+      this.setState({conversations: newConversations});
+    }
+
+    var messages;
+    if (isStorageSupported() && (messages = localStorage.getItem(sender)))
+      messages = JSON.parse(messages);
+    else
+      messages = [];
+    messages.push(message);
+
+    if (isStorageSupported())
+      localStorage.setItem(sender, JSON.stringify(messages));
+
+    this.forceUpdate();
+  },
   getInitialState: function() {
     return {
       name: this.getName(),
@@ -184,6 +210,7 @@ var ChatSystem = React.createClass({
     socket.on('add user', this.addUser);
     socket.on('remove user', this.removeUser);
     socket.on('update users', this.updateUsers);
+    socket.on('new message', this.newMessage);
 
     // If client is already registered, join the chat network
     if (this.state.name)
@@ -213,9 +240,10 @@ var ChatSystem = React.createClass({
     this.setState({conversations: newList});
   },
   render: function() {
-    var chatBoxes = this.state.conversations.map(function(person, index) {
+    var x = this.state.name;
+    var chatBoxes = this.state.conversations.map(function(friend, index) {
       return (
-        <ChatBox key={index} name={person} />
+        <ChatBox key={index} myName={this.state.name} friendName={friend} />
       );
     });
     return (

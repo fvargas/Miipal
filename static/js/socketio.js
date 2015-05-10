@@ -7,3 +7,12 @@ function joinServer(name) {
 function getUsers() {
   socket.emit('get users');
 }
+
+function sendMessage(myName, friendName, message) {
+  var data = {
+    sender: myName,
+    recipient: friendName,
+    message: message
+  };
+  socket.emit('send message', data);
+}

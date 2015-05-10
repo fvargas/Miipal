@@ -45,6 +45,19 @@ def on_get_users():
 
     emit('update users', {'user_list': user_names})
 
+@socketio.on('send message')
+def on_send_message(data):
+    print(data)
+    sender = data['sender']
+    recipient = data['recipient']
+    message = data['message']
+
+    data = {
+        'sender': sender,
+        'message': message,
+    }
+    emit('new message', data, room=recipient)
+
 @socketio.on('disconnect')
 def on_disconnect():
     # If client did not join server prior to disconnecting

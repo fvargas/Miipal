@@ -118,12 +118,12 @@ var ChatBox = React.createClass({displayName: "ChatBox",
     return {messages: this.getMessages()};
   },
   handleMessageSubmit: function(message) {
-    var messageList = this.state.messages.slice();
-    messageList.push(message);
-    this.setState({messages: messageList});
+    var newMessageList = this.state.messages.slice();
+    newMessageList.push(message);
+    this.setState({messages: newMessageList});
 
     if (isStorageSupported()) {
-      localStorage.setItem(this.props.name, JSON.stringify(messageList));
+      localStorage.setItem(this.props.name, JSON.stringify(newMessageList));
     }
   },
   render: function() {
@@ -145,23 +145,62 @@ var ChatSystem = React.createClass({displayName: "ChatSystem",
     // Local storage not supported or user not registered
     return '';
   },
-  fetchUserList: function() {
-    return ['Elon', 'Steve', 'Tesla'];
+  addUser: function(data) {
+    var newUser = data.user;
+
+    // If new user is not the same as the current user
+    if (newUser !== this.state.name) {
+      // Add the new user to the user list
+      var newUserList = this.state.users.slice();
+      newUserList.push(newUser);
+
+      this.setState({users: newUserList});
+    }
+  },
+  removeUser: function(data) {
+    var user = data['user'];
+    var newUserList = this.state.users.slice();
+    var index = newUserList.indexOf(user);
+
+    // If user is found in the user list, remove user
+    if (index >= 0) {
+      newUserList.splice(index, 1);
+      this.setState({users: newUserList});
+    }
+  },
+  updateUsers: function(data) {
+    var users = data['user_list'];
+    this.setState({users, users});
   },
   getInitialState: function() {
     return {
       name: this.getName(),
-      users: this.fetchUserList(),
+      users: [],
       conversations: []
     }
   },
+  componentDidMount: function() {
+    // Register all the event listeners
+    socket.on('add user', this.addUser);
+    socket.on('remove user', this.removeUser);
+    socket.on('update users', this.updateUsers);
+
+    // If client is already registered, join the chat network
+    if (this.state.name)
+      joinServer(this.state.name);
+    
+    // Get the list of currently connected users
+    getUsers();
+  },
   registerUser: function(name) {
-    // Invalid name matches 
+    // Client tried to register with invalid name
     if (name === STORAGE_NAME_KEY)
       return;
+
     if (isStorageSupported()) {
       localStorage.setItem(STORAGE_NAME_KEY, name);
       this.setState({name: name});
+      joinServer(name);
     }
   },
   handleNewConversation: function(user) {

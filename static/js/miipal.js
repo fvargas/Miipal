@@ -117,7 +117,7 @@ var ChatBox = React.createClass({displayName: "ChatBox",
   getInitialState: function() {
     return {messages: this.getMessages()};
   },
-  handleMessageSubmit: function(message) {
+  addNewMessage: function(message) {
     var newMessageList = this.state.messages.slice();
     newMessageList.push(message);
     this.setState({messages: newMessageList});
@@ -126,9 +126,15 @@ var ChatBox = React.createClass({displayName: "ChatBox",
     if (isStorageSupported()) {
       localStorage.setItem(this.props.friendName, JSON.stringify(newMessageList));
     }
-
+  },
+  handleMessageSubmit: function(message) {
+    this.addNewMessage(message);
     // Send the message to the server
     sendMessage(this.props.myName, this.props.friendName, message);
+  },
+  componentWillReceiveProps: function(nextProps) {
+    if (nextProps.latestMessage !== '')
+      this.addNewMessage(nextProps.latestMessage);
   },
   render: function() {
     return (
@@ -183,26 +189,35 @@ var ChatSystem = React.createClass({displayName: "ChatSystem",
     if (this.state.conversations.indexOf(sender) < 0) {
       var newConversations = this.state.conversations.slice();
       newConversations.push(sender);
+      /**
+       * It is important that a new conversation be given its own setState()
+       * call because componentWillReceiveProps() will not be called for the
+       * initial render of a component.
+       */
       this.setState({conversations: newConversations});
     }
 
-    var messages;
-    if (isStorageSupported() && (messages = localStorage.getItem(sender)))
-      messages = JSON.parse(messages);
-    else
-      messages = [];
-    messages.push(message);
-
-    if (isStorageSupported())
-      localStorage.setItem(sender, JSON.stringify(messages));
-
-    this.forceUpdate();
+    var latestMessage = {
+      friendName: sender,
+      message: message
+    };
+    this.setState({latestMessage: latestMessage}, function() {
+      var defaultMessage =  {
+        friendName: '',
+        message: ''
+      };
+      this.setState({latestMessage: defaultMessage});
+    });
   },
   getInitialState: function() {
     return {
       name: this.getName(),
       users: [],
-      conversations: []
+      conversations: [],
+      latestMessage: {
+        friendName: '',
+        message: ''
+      }
     }
   },
   componentDidMount: function() {
@@ -240,10 +255,13 @@ var ChatSystem = React.createClass({displayName: "ChatSystem",
     this.setState({conversations: newList});
   },
   render: function() {
-    var x = this.state.name;
-    var chatBoxes = this.state.conversations.map(function(friend, index) {
+    var myName = this.state.name;
+    var latestMessage = this.state.latestMessage;
+    var chatBoxes = this.state.conversations.map(function(friendName, index) {
+      var message = latestMessage.friendName === friendName ?
+        latestMessage.message : '';
       return (
-        React.createElement(ChatBox, {key: index, myName: this.state.name, friendName: friend})
+        React.createElement(ChatBox, {key: index, myName: myName, friendName: friendName, latestMessage: message})
       );
     });
     return (

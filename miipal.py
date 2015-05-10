@@ -47,7 +47,6 @@ def on_get_users():
 
 @socketio.on('send message')
 def on_send_message(data):
-    print(data)
     sender = data['sender']
     recipient = data['recipient']
     message = data['message']

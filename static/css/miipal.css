@@ -1,0 +1,7 @@
+.chatBox {
+    width: 19vw;
+}
+
+.chatBox .panel-body {
+    height: 30vh;
+}

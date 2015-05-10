@@ -111,7 +111,7 @@ var ChatInputForm = React.createClass({displayName: "ChatInputForm",
   render: function() {
     return (
       React.createElement("form", {className: "chatInputForm", onSubmit: this.handleSubmit}, 
-        React.createElement("input", {type: "text", placeholder: "Enter your message...", ref: "message", autoFocus: "autoFocus"})
+        React.createElement("input", {type: "text", className: "form-control", placeholder: "Enter your message...", ref: "message", autoFocus: "autoFocus"})
       )
     );
   }
@@ -152,10 +152,16 @@ var ChatBox = React.createClass({displayName: "ChatBox",
   },
   render: function() {
     return (
-      React.createElement("div", {className: "chatBox"}, 
-        React.createElement("h2", null, this.props.friendName), 
-        React.createElement(ChatMessages, {messages: this.state.messages}), 
-        React.createElement(ChatInputForm, {onMessageSubmit: this.handleMessageSubmit})
+      React.createElement("div", {className: "chatBox panel panel-default"}, 
+        React.createElement("div", {className: "panel-heading"}, 
+          React.createElement("span", {className: "panel-title"}, this.props.friendName)
+        ), 
+        React.createElement("div", {className: "panel-body"}, 
+          React.createElement(ChatMessages, {messages: this.state.messages})
+        ), 
+        React.createElement("div", {className: "panel-footer"}, 
+          React.createElement(ChatInputForm, {onMessageSubmit: this.handleMessageSubmit})
+        )
       )
     );
   }
@@ -277,7 +283,7 @@ var ChatSystem = React.createClass({displayName: "ChatSystem",
       var message = latestMessage.friendName === friendName ?
         latestMessage.message : '';
       return (
-        React.createElement("div", {key: index, className: "col-sm-2"}, 
+        React.createElement("div", {key: index, className: "col-sm-3"}, 
           React.createElement(ChatBox, {myName: myName, friendName: friendName, latestMessage: message})
         )
       );

@@ -111,7 +111,7 @@ var ChatInputForm = React.createClass({
   render: function() {
     return (
       <form className="chatInputForm" onSubmit={this.handleSubmit}>
-        <input type="text" placeholder="Enter your message..." ref="message" autoFocus="autoFocus" />
+        <input type="text" className="form-control" placeholder="Enter your message..." ref="message" autoFocus="autoFocus" />
       </form>
     );
   }
@@ -152,10 +152,16 @@ var ChatBox = React.createClass({
   },
   render: function() {
     return (
-      <div className="chatBox">
-        <h2>{this.props.friendName}</h2>
-        <ChatMessages messages={this.state.messages} />
-        <ChatInputForm onMessageSubmit={this.handleMessageSubmit} />
+      <div className="chatBox panel panel-default">
+        <div className="panel-heading">
+          <span className="panel-title">{this.props.friendName}</span>
+        </div>
+        <div className="panel-body">
+          <ChatMessages messages={this.state.messages} />
+        </div>
+        <div className="panel-footer">
+          <ChatInputForm onMessageSubmit={this.handleMessageSubmit} />
+        </div>
       </div>
     );
   }
@@ -277,7 +283,7 @@ var ChatSystem = React.createClass({
       var message = latestMessage.friendName === friendName ?
         latestMessage.message : '';
       return (
-        <div key={index} className="col-sm-2">
+        <div key={index} className="col-sm-3">
           <ChatBox myName={myName} friendName={friendName} latestMessage={message} />
         </div>
       );

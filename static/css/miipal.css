@@ -15,3 +15,7 @@
 .chatInputForm input:focus {
   box-shadow: none;
 }
+
+.chatBox .panel-body {
+  overflow: scroll;
+}

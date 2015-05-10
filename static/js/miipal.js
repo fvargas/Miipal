@@ -146,6 +146,10 @@ var ChatBox = React.createClass({displayName: "ChatBox",
     // Send the message to the server
     sendMessage(this.props.myName, this.props.friendName, message);
   },
+  scrollToBottom: function() {
+    var chatBody = React.findDOMNode(this.refs.body);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  },
   componentWillReceiveProps: function(nextProps) {
     if (nextProps.latestMessage !== '')
       this.addAndStoreNewMessage(nextProps.latestMessage);
@@ -156,7 +160,7 @@ var ChatBox = React.createClass({displayName: "ChatBox",
         React.createElement("div", {className: "panel-heading"}, 
           React.createElement("span", {className: "panel-title"}, this.props.friendName)
         ), 
-        React.createElement("div", {className: "panel-body"}, 
+        React.createElement("div", {className: "panel-body", ref: "body"}, 
           React.createElement(ChatMessages, {messages: this.state.messages})
         ), 
         React.createElement("div", {className: "panel-footer"}, 
@@ -164,6 +168,12 @@ var ChatBox = React.createClass({displayName: "ChatBox",
         )
       )
     );
+  },
+  componentDidMount: function() {
+    this.scrollToBottom();
+  },
+  componentDidUpdate: function() {
+    this.scrollToBottom();
   }
 });
 

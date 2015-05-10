@@ -146,6 +146,10 @@ var ChatBox = React.createClass({
     // Send the message to the server
     sendMessage(this.props.myName, this.props.friendName, message);
   },
+  scrollToBottom: function() {
+    var chatBody = React.findDOMNode(this.refs.body);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  },
   componentWillReceiveProps: function(nextProps) {
     if (nextProps.latestMessage !== '')
       this.addAndStoreNewMessage(nextProps.latestMessage);
@@ -156,7 +160,7 @@ var ChatBox = React.createClass({
         <div className="panel-heading">
           <span className="panel-title">{this.props.friendName}</span>
         </div>
-        <div className="panel-body">
+        <div className="panel-body" ref="body">
           <ChatMessages messages={this.state.messages} />
         </div>
         <div className="panel-footer">
@@ -164,6 +168,12 @@ var ChatBox = React.createClass({
         </div>
       </div>
     );
+  },
+  componentDidMount: function() {
+    this.scrollToBottom();
+  },
+  componentDidUpdate: function() {
+    this.scrollToBottom();
   }
 });
 

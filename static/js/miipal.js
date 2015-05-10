@@ -117,7 +117,8 @@ var ChatBox = React.createClass({displayName: "ChatBox",
   getInitialState: function() {
     return {messages: this.getMessages()};
   },
-  addNewMessage: function(message) {
+  addAndStoreNewMessage: function(message) {
+    // Update messages state
     var newMessageList = this.state.messages.slice();
     newMessageList.push(message);
     this.setState({messages: newMessageList});
@@ -128,13 +129,16 @@ var ChatBox = React.createClass({displayName: "ChatBox",
     }
   },
   handleMessageSubmit: function(message) {
-    this.addNewMessage(message);
+    // Prepend user's name to message
+    message = this.props.myName + ': ' + message;
+
+    this.addAndStoreNewMessage(message);
     // Send the message to the server
     sendMessage(this.props.myName, this.props.friendName, message);
   },
   componentWillReceiveProps: function(nextProps) {
     if (nextProps.latestMessage !== '')
-      this.addNewMessage(nextProps.latestMessage);
+      this.addAndStoreNewMessage(nextProps.latestMessage);
   },
   render: function() {
     return (

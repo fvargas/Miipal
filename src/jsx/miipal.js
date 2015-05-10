@@ -13,8 +13,10 @@ var NameForm = React.createClass({
   render: function() {
     return (
       <form className="nameForm" onSubmit={this.handleSubmit}>
-        <label htmlFor="name">Name</label>
-        <input type="text" id="name" placeholder="Po-Shen Loh" ref="name" autofocus />
+        <div className="form-group">
+          <label htmlFor="name">Name</label>
+          <input type="text" id="name" className="form-control" placeholder="Po-Shen Loh" ref="name" autoFocus="autoFocus" />
+        </div>
       </form>
     );
   }
@@ -47,11 +49,13 @@ var UserSelectForm = React.createClass({
     });
     return (
       <form className="userSelectForm" onChange={this.handleSubmit}>
-        <label htmlFor="user">Start a Conversation</label>
-        <select id="user" ref="user" defaultValue="">
-          <option value="">Select a user...</option>
-          {users}
-        </select>
+        <div className="form-group">
+          <label htmlFor="user">Start a Conversation</label>
+          <select id="user" className="form-control" ref="user" defaultValue="">
+            <option value="">Select a user...</option>
+            {users}
+          </select>
+        </div>
       </form>
     );
   }
@@ -60,9 +64,15 @@ var UserSelectForm = React.createClass({
 var ChatBar = React.createClass({
   render: function() {
     return (
-      <div className="chatBar">
-        {this.props.name ? <NameLabel name={this.props.name} /> : <NameForm onRegister={this.props.onRegister} />}
-        <UserSelectForm users={this.props.users} onNewConversation={this.props.handleNewConversation} />
+      <div className="chatBar panel panel-default row">
+        <div className="panel-body">
+          <div className="col-sm-4">
+            {this.props.name ? <NameLabel name={this.props.name} /> : <NameForm onRegister={this.props.onRegister} />}
+          </div>
+          <div className="col-sm-8">
+            <UserSelectForm users={this.props.users} onNewConversation={this.props.handleNewConversation} />
+          </div>
+        </div>
       </div>
     );
   }
@@ -101,7 +111,7 @@ var ChatInputForm = React.createClass({
   render: function() {
     return (
       <form className="chatInputForm" onSubmit={this.handleSubmit}>
-        <input type="text" placeholder="Enter your message..." ref="message" />
+        <input type="text" placeholder="Enter your message..." ref="message" autoFocus="autoFocus" />
       </form>
     );
   }
@@ -267,7 +277,9 @@ var ChatSystem = React.createClass({
       var message = latestMessage.friendName === friendName ?
         latestMessage.message : '';
       return (
-        <ChatBox key={index} myName={myName} friendName={friendName} latestMessage={message} />
+        <div key={index} className="col-sm-2">
+          <ChatBox myName={myName} friendName={friendName} latestMessage={message} />
+        </div>
       );
     });
     return (
@@ -276,7 +288,9 @@ var ChatSystem = React.createClass({
         <ChatBar name={this.state.name} users={this.state.users}
                  onRegister={this.registerUser}
                  handleNewConversation={this.handleNewConversation} />
-        {chatBoxes}
+        <div className="row">
+          {chatBoxes}
+        </div>
       </div>
     );
   }

@@ -13,8 +13,10 @@ var NameForm = React.createClass({displayName: "NameForm",
   render: function() {
     return (
       React.createElement("form", {className: "nameForm", onSubmit: this.handleSubmit}, 
-        React.createElement("label", {htmlFor: "name"}, "Name"), 
-        React.createElement("input", {type: "text", id: "name", placeholder: "Po-Shen Loh", ref: "name", autofocus: true})
+        React.createElement("div", {className: "form-group"}, 
+          React.createElement("label", {htmlFor: "name"}, "Name"), 
+          React.createElement("input", {type: "text", id: "name", className: "form-control", placeholder: "Po-Shen Loh", ref: "name", autoFocus: "autoFocus"})
+        )
       )
     );
   }
@@ -47,10 +49,12 @@ var UserSelectForm = React.createClass({displayName: "UserSelectForm",
     });
     return (
       React.createElement("form", {className: "userSelectForm", onChange: this.handleSubmit}, 
-        React.createElement("label", {htmlFor: "user"}, "Start a Conversation"), 
-        React.createElement("select", {id: "user", ref: "user", defaultValue: ""}, 
-          React.createElement("option", {value: ""}, "Select a user..."), 
-          users
+        React.createElement("div", {className: "form-group"}, 
+          React.createElement("label", {htmlFor: "user"}, "Start a Conversation"), 
+          React.createElement("select", {id: "user", className: "form-control", ref: "user", defaultValue: ""}, 
+            React.createElement("option", {value: ""}, "Select a user..."), 
+            users
+          )
         )
       )
     );
@@ -60,9 +64,15 @@ var UserSelectForm = React.createClass({displayName: "UserSelectForm",
 var ChatBar = React.createClass({displayName: "ChatBar",
   render: function() {
     return (
-      React.createElement("div", {className: "chatBar"}, 
-        this.props.name ? React.createElement(NameLabel, {name: this.props.name}) : React.createElement(NameForm, {onRegister: this.props.onRegister}), 
-        React.createElement(UserSelectForm, {users: this.props.users, onNewConversation: this.props.handleNewConversation})
+      React.createElement("div", {className: "chatBar panel panel-default row"}, 
+        React.createElement("div", {className: "panel-body"}, 
+          React.createElement("div", {className: "col-sm-4"}, 
+            this.props.name ? React.createElement(NameLabel, {name: this.props.name}) : React.createElement(NameForm, {onRegister: this.props.onRegister})
+          ), 
+          React.createElement("div", {className: "col-sm-8"}, 
+            React.createElement(UserSelectForm, {users: this.props.users, onNewConversation: this.props.handleNewConversation})
+          )
+        )
       )
     );
   }
@@ -101,7 +111,7 @@ var ChatInputForm = React.createClass({displayName: "ChatInputForm",
   render: function() {
     return (
       React.createElement("form", {className: "chatInputForm", onSubmit: this.handleSubmit}, 
-        React.createElement("input", {type: "text", placeholder: "Enter your message...", ref: "message"})
+        React.createElement("input", {type: "text", placeholder: "Enter your message...", ref: "message", autoFocus: "autoFocus"})
       )
     );
   }
@@ -267,7 +277,9 @@ var ChatSystem = React.createClass({displayName: "ChatSystem",
       var message = latestMessage.friendName === friendName ?
         latestMessage.message : '';
       return (
-        React.createElement(ChatBox, {key: index, myName: myName, friendName: friendName, latestMessage: message})
+        React.createElement("div", {key: index, className: "col-sm-2"}, 
+          React.createElement(ChatBox, {myName: myName, friendName: friendName, latestMessage: message})
+        )
       );
     });
     return (
@@ -276,7 +288,9 @@ var ChatSystem = React.createClass({displayName: "ChatSystem",
         React.createElement(ChatBar, {name: this.state.name, users: this.state.users, 
                  onRegister: this.registerUser, 
                  handleNewConversation: this.handleNewConversation}), 
-        chatBoxes
+        React.createElement("div", {className: "row"}, 
+          chatBoxes
+        )
       )
     );
   }

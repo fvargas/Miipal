@@ -210,7 +210,7 @@ var ChatSystem = React.createClass({
   },
   updateUsers: function(data) {
     var users = data['user_list'];
-    this.setState({users, users});
+    this.setState({users: users});
   },
   newMessage: function(data) {
     var sender = data.sender;

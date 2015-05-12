@@ -31,14 +31,18 @@ var NameLabel = React.createClass({
 });
 
 var UserSelectForm = React.createClass({
-  handleSubmit: function(e) {
+  handleChange: function(e) {
     e.preventDefault();
     
-    var selectedUser = React.findDOMNode(this.refs.user).value;
+    var select = React.findDOMNode(this.refs.user);
+    var selectedUser = select.value;
     // Do nothing if user selected the default option
     if (!selectedUser)
       return;
 
+    // Reset select element
+    select.selectedIndex = 0;
+    // Create new chat box with selected user
     this.props.onNewConversation(selectedUser);
   },
   render: function() {
@@ -48,7 +52,7 @@ var UserSelectForm = React.createClass({
       );
     });
     return (
-      <form className="userSelectForm" onChange={this.handleSubmit}>
+      <form className="userSelectForm" onChange={this.handleChange}>
         <div className="form-group">
           <label htmlFor="user">Start a Conversation</label>
           <select id="user" className="form-control" ref="user" defaultValue="">
@@ -154,11 +158,15 @@ var ChatBox = React.createClass({
     if (nextProps.latestMessage !== '')
       this.addAndStoreNewMessage(nextProps.latestMessage);
   },
+  handleCloseBox: function() {
+    this.props.onCloseBox(this.props.friendName);
+  },
   render: function() {
     return (
       <div className="chatBox panel panel-primary">
         <div className="panel-heading">
           <span className="panel-title">{this.props.friendName}</span>
+          <button type="button" className="close" onClick={this.handleCloseBox}>&times;</button>
         </div>
         <div className="panel-body" ref="body">
           <ChatMessages messages={this.state.messages} />
@@ -286,18 +294,30 @@ var ChatSystem = React.createClass({
       this.setState({conversations: newList});
     }
   },
+  handleCloseBox: function(user) {
+    var conversations = this.state.conversations.slice();
+    var index = conversations.indexOf(user);
+    
+    if (index >= 0) {
+      conversations.splice(index, 1);
+      this.setState({conversations: conversations});
+    }
+  },
   render: function() {
+    // These assignments are necessary because of scoping inside the callback
     var myName = this.state.name;
     var latestMessage = this.state.latestMessage;
+    var handleCloseBox = this.handleCloseBox;
     var chatBoxes = this.state.conversations.map(function(friendName, index) {
       var message = latestMessage.friendName === friendName ?
         latestMessage.message : '';
       return (
         <div key={index} className="col-sm-3">
-          <ChatBox myName={myName} friendName={friendName} latestMessage={message} />
+          <ChatBox myName={myName} friendName={friendName} onCloseBox={handleCloseBox} latestMessage={message} />
         </div>
       );
     });
+
     return (
       <div className="chatSystem">
         <h1>Miipal</h1>

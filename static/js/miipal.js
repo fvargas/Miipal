@@ -31,14 +31,18 @@ var NameLabel = React.createClass({displayName: "NameLabel",
 });
 
 var UserSelectForm = React.createClass({displayName: "UserSelectForm",
-  handleSubmit: function(e) {
+  handleChange: function(e) {
     e.preventDefault();
     
-    var selectedUser = React.findDOMNode(this.refs.user).value;
+    var select = React.findDOMNode(this.refs.user);
+    var selectedUser = select.value;
     // Do nothing if user selected the default option
     if (!selectedUser)
       return;
 
+    // Reset select element
+    select.selectedIndex = 0;
+    // Create new chat box with selected user
     this.props.onNewConversation(selectedUser);
   },
   render: function() {
@@ -48,7 +52,7 @@ var UserSelectForm = React.createClass({displayName: "UserSelectForm",
       );
     });
     return (
-      React.createElement("form", {className: "userSelectForm", onChange: this.handleSubmit}, 
+      React.createElement("form", {className: "userSelectForm", onChange: this.handleChange}, 
         React.createElement("div", {className: "form-group"}, 
           React.createElement("label", {htmlFor: "user"}, "Start a Conversation"), 
           React.createElement("select", {id: "user", className: "form-control", ref: "user", defaultValue: ""}, 
@@ -154,11 +158,15 @@ var ChatBox = React.createClass({displayName: "ChatBox",
     if (nextProps.latestMessage !== '')
       this.addAndStoreNewMessage(nextProps.latestMessage);
   },
+  handleCloseBox: function() {
+    this.props.onCloseBox(this.props.friendName);
+  },
   render: function() {
     return (
       React.createElement("div", {className: "chatBox panel panel-primary"}, 
         React.createElement("div", {className: "panel-heading"}, 
-          React.createElement("span", {className: "panel-title"}, this.props.friendName)
+          React.createElement("span", {className: "panel-title"}, this.props.friendName), 
+          React.createElement("button", {type: "button", className: "close", onClick: this.handleCloseBox}, "×")
         ), 
         React.createElement("div", {className: "panel-body", ref: "body"}, 
           React.createElement(ChatMessages, {messages: this.state.messages})
@@ -286,18 +294,30 @@ var ChatSystem = React.createClass({displayName: "ChatSystem",
       this.setState({conversations: newList});
     }
   },
+  handleCloseBox: function(user) {
+    var conversations = this.state.conversations.slice();
+    var index = conversations.indexOf(user);
+    
+    if (index >= 0) {
+      conversations.splice(index, 1);
+      this.setState({conversations: conversations});
+    }
+  },
   render: function() {
+    // These assignments are necessary because of scoping inside the callback
     var myName = this.state.name;
     var latestMessage = this.state.latestMessage;
+    var handleCloseBox = this.handleCloseBox;
     var chatBoxes = this.state.conversations.map(function(friendName, index) {
       var message = latestMessage.friendName === friendName ?
         latestMessage.message : '';
       return (
         React.createElement("div", {key: index, className: "col-sm-3"}, 
-          React.createElement(ChatBox, {myName: myName, friendName: friendName, latestMessage: message})
+          React.createElement(ChatBox, {myName: myName, friendName: friendName, onCloseBox: handleCloseBox, latestMessage: message})
         )
       );
     });
+
     return (
       React.createElement("div", {className: "chatSystem"}, 
         React.createElement("h1", null, "Miipal"), 

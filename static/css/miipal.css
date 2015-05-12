@@ -19,3 +19,11 @@
 .chatBox .panel-body {
   overflow: scroll;
 }
+
+.close:hover {
+    opacity: .365;
+}
+
+.close:focus {
+    outline: none;
+}

@@ -22,7 +22,14 @@ def home():
 
 @socketio.on('join')
 def on_join(data):
-    name = data['name']
+    try:
+        name = data['name']
+    except KeyError:
+        return
+
+    # Name must not be empty
+    if not name:
+        return
 
     clients[request.namespace.socket.sessid] = name
     users[name] = users.get(name, 0) + 1
@@ -47,9 +54,16 @@ def on_get_users():
 
 @socketio.on('send message')
 def on_send_message(data):
-    sender = data['sender']
-    recipient = data['recipient']
-    message = data['message']
+    try:
+        sender = data['sender']
+        recipient = data['recipient']
+        message = data['message']
+    except KeyError:
+        return
+
+    # Sender has not joined the server
+    if not request.namespace.socket.sessid in clients:
+        return
 
     data = {
         'sender': sender,

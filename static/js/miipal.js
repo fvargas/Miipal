@@ -33,15 +33,16 @@ var NameLabel = React.createClass({displayName: "NameLabel",
 var UserSelectForm = React.createClass({displayName: "UserSelectForm",
   handleChange: function(e) {
     e.preventDefault();
-    
+
     var select = React.findDOMNode(this.refs.user);
     var selectedUser = select.value;
-    // Do nothing if user selected the default option
-    if (!selectedUser)
-      return;
-
     // Reset select element
     select.selectedIndex = 0;
+
+    // Do nothing if user selected default option or user has not registered
+    if (!selectedUser || !this.props.userHasRegistered)
+      return;
+
     // Create new chat box with selected user
     this.props.onNewConversation(selectedUser);
   },
@@ -74,7 +75,9 @@ var ChatBar = React.createClass({displayName: "ChatBar",
             this.props.name ? React.createElement(NameLabel, {name: this.props.name}) : React.createElement(NameForm, {onRegister: this.props.onRegister})
           ), 
           React.createElement("div", {className: "col-sm-8"}, 
-            React.createElement(UserSelectForm, {users: this.props.users, onNewConversation: this.props.handleNewConversation})
+            React.createElement(UserSelectForm, {users: this.props.users, 
+                            userHasRegistered: this.props.name ? true : false, 
+                            onNewConversation: this.props.handleNewConversation})
           )
         )
       )
@@ -212,7 +215,7 @@ var ChatSystem = React.createClass({displayName: "ChatSystem",
     if (isStorageSupported() && (name = localStorage.getItem(STORAGE_NAME_KEY)))
       return name;
 
-    // Local storage not supported or user not registered
+    // Local storage not supported or user has not registered
     return '';
   },
   addUser: function(data) {

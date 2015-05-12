@@ -109,8 +109,8 @@ var ChatInputForm = React.createClass({
     if (!message)
       return;
 
-    this.props.onMessageSubmit(message);
-    React.findDOMNode(this.refs.message).value = '';
+    if (this.props.onMessageSubmit(message))
+      React.findDOMNode(this.refs.message).value = '';
   },
   render: function() {
     return (
@@ -123,13 +123,17 @@ var ChatInputForm = React.createClass({
 
 var ChatBox = React.createClass({
   getMessages: function() {
-    if (isStorageSupported() && (messages = localStorage.getItem(this.props.friendName)))
+    if (isStorageSupported() &&
+        (messages = localStorage.getItem(this.props.friendName))) {
       return JSON.parse(messages);
-    else
+  } else {
       return [];
+    }
   },
   getInitialState: function() {
-    return {messages: this.getMessages()};
+    return {
+      messages: this.getMessages()
+    };
   },
   addAndStoreNewMessage: function(message) {
     // Update messages state
@@ -139,16 +143,23 @@ var ChatBox = React.createClass({
 
     // Store the new message
     if (isStorageSupported()) {
-      localStorage.setItem(this.props.friendName, JSON.stringify(newMessageList));
+      localStorage.setItem(this.props.friendName,
+                           JSON.stringify(newMessageList));
     }
   },
   handleMessageSubmit: function(message) {
-    // Prepend user's name to message
-    message = this.props.myName + ': ' + message;
+    if (this.props.friendIsConnected) {
+      // Prepend user's name to message
+      message = this.props.myName + ': ' + message;
 
-    this.addAndStoreNewMessage(message);
-    // Send the message to the server
-    sendMessage(this.props.myName, this.props.friendName, message);
+      this.addAndStoreNewMessage(message);
+      // Send the message to the server
+      sendMessage(this.props.myName, this.props.friendName, message);
+
+      return true;
+    } else {
+      return false;
+    }
   },
   scrollToBottom: function() {
     var chatBody = React.findDOMNode(this.refs.body);
@@ -162,14 +173,25 @@ var ChatBox = React.createClass({
     this.props.onCloseBox(this.props.friendName);
   },
   render: function() {
+    var friendDisconnectedAlert;
+    if (!this.props.friendIsConnected) {
+      friendDisconnectedAlert = <div className="alert alert-danger"
+                                     role="alert">
+                                     {this.props.friendName} is currently offline</div>;
+    } else {
+      friendDisconnectedAlert = '';
+    }
+
     return (
       <div className="chatBox panel panel-primary">
         <div className="panel-heading">
           <span className="panel-title">{this.props.friendName}</span>
-          <button type="button" className="close" onClick={this.handleCloseBox}>&times;</button>
+          <button type="button" className="close"
+                  onClick={this.handleCloseBox}>&times;</button>
         </div>
         <div className="panel-body" ref="body">
           <ChatMessages messages={this.state.messages} />
+          {friendDisconnectedAlert}
         </div>
         <div className="panel-footer">
           <ChatInputForm onMessageSubmit={this.handleMessageSubmit} />
@@ -201,12 +223,11 @@ var ChatSystem = React.createClass({
       // Add the new user to the user list
       var newUserList = this.state.users.slice();
       newUserList.push(newUser);
-
       this.setState({users: newUserList});
     }
   },
   removeUser: function(data) {
-    var user = data['user'];
+    var user = data.user;
     var newUserList = this.state.users.slice();
     var index = newUserList.indexOf(user);
 
@@ -217,7 +238,7 @@ var ChatSystem = React.createClass({
     }
   },
   updateUsers: function(data) {
-    var users = data['user_list'];
+    var users = data.user_list;
     this.setState({users: users});
   },
   newMessage: function(data) {
@@ -303,17 +324,32 @@ var ChatSystem = React.createClass({
       this.setState({conversations: conversations});
     }
   },
+  isUserConnected: function(user) {
+    if (this.state.users.indexOf(user) >= 0)
+      return true;
+
+    return false;
+  },
   render: function() {
-    // These assignments are necessary because of scoping inside the callback
+    /**
+     * These assignments are necessary because of scoping witin the callback
+     * below.
+     */
     var myName = this.state.name;
     var latestMessage = this.state.latestMessage;
     var handleCloseBox = this.handleCloseBox;
+    var isUserConnected = this.isUserConnected;
+
     var chatBoxes = this.state.conversations.map(function(friendName, index) {
       var message = latestMessage.friendName === friendName ?
         latestMessage.message : '';
+      var friendIsConnected = isUserConnected(friendName);
+
       return (
         <div key={index} className="col-sm-3">
-          <ChatBox myName={myName} friendName={friendName} onCloseBox={handleCloseBox} latestMessage={message} />
+          <ChatBox myName={myName} friendName={friendName}
+                   friendIsConnected={friendIsConnected}
+                   onCloseBox={handleCloseBox} latestMessage={message} />
         </div>
       );
     });

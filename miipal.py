@@ -3,7 +3,7 @@ User refers to the person affiliated with a particular name in the network.
 Client refers to the client-end of a connection.
 '''
 
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request
 from flask.ext.socketio import SocketIO, emit, join_room, leave_room
 
 app = Flask(__name__)

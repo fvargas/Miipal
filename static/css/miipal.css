@@ -1,5 +1,6 @@
 .chatBox .panel-body {
   height: 30vh;
+  overflow: scroll;
 }
 
 .chatBox .panel-footer {
@@ -14,10 +15,6 @@
 
 .chatInputForm input:focus {
   box-shadow: none;
-}
-
-.chatBox .panel-body {
-  overflow: scroll;
 }
 
 .close {

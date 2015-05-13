@@ -1,7 +1,8 @@
-'''
+"""
 User refers to the person affiliated with a particular name in the network.
 Client refers to the client-end of a connection.
-'''
+    e.g. Each tab in Chrome is considered a client.
+"""
 
 from flask import Flask, render_template, request
 from flask.ext.socketio import SocketIO, emit, join_room, leave_room
@@ -18,10 +19,17 @@ users = {}
 
 @app.route('/')
 def home():
+    """Render the home page."""
     return render_template('home.html')
 
 @socketio.on('join')
 def on_join(data):
+    """Respond to the 'join' event by registering the user.
+
+    Create a client entry for the joining user, add the client to the room
+    representing the given user, and broadcast the user's joining to all
+    connected clients."""
+
     try:
         name = data['name']
     except KeyError:
@@ -44,6 +52,7 @@ def on_join(data):
 
 @socketio.on('get users')
 def on_get_users():
+    """Respond to the 'get users' event with the list of connected users."""
     user_names = users.keys()
     # If client has already joined the server
     if clients.has_key(request.namespace.socket.sessid):
@@ -54,6 +63,12 @@ def on_get_users():
 
 @socketio.on('send message')
 def on_send_message(data):
+    """Respond to the 'send message' event by routing the message.
+
+    Verify that the sending user has joined, and proceed to broadcast the
+    message to all clients connected to the room corresponding to the
+    recipient."""
+
     try:
         sender = data['sender']
         recipient = data['recipient']
@@ -73,6 +88,7 @@ def on_send_message(data):
 
 @socketio.on('disconnect')
 def on_disconnect():
+    """Remove disconnected client and broadcast to connected users."""
     # If client did not join server prior to disconnecting
     if not clients.get(request.namespace.socket.sessid):
         return

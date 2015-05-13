@@ -1,3 +1,4 @@
+// Key for storing the user's name in the browser
 var STORAGE_NAME_KEY = '_name';
 
 var NameForm = React.createClass({
@@ -175,6 +176,12 @@ var ChatBox = React.createClass({
   handleCloseBox: function() {
     this.props.onCloseBox(this.props.friendName);
   },
+  componentDidMount: function() {
+    this.scrollToBottom();
+  },
+  componentDidUpdate: function() {
+    this.scrollToBottom();
+  },
   render: function() {
     var friendDisconnectedAlert;
     if (!this.props.friendIsConnected) {
@@ -201,12 +208,6 @@ var ChatBox = React.createClass({
         </div>
       </div>
     );
-  },
-  componentDidMount: function() {
-    this.scrollToBottom();
-  },
-  componentDidUpdate: function() {
-    this.scrollToBottom();
   }
 });
 
@@ -234,8 +235,9 @@ var ChatSystem = React.createClass({
     var newUserList = this.state.users.slice();
     var index = newUserList.indexOf(user);
 
-    // If user is found in the user list, remove user
+    // If user is found in the user list
     if (index >= 0) {
+      // Remove user
       newUserList.splice(index, 1);
       this.setState({users: newUserList});
     }
@@ -244,10 +246,11 @@ var ChatSystem = React.createClass({
     var users = data.user_list;
     this.setState({users: users});
   },
-  newMessage: function(data) {
+  newMessageReceived: function(data) {
     var sender = data.sender;
     var message = data.message;
 
+    // If a conversation with this user is not already open
     if (this.state.conversations.indexOf(sender) < 0) {
       var newConversations = this.state.conversations.slice();
       newConversations.push(sender);
@@ -287,7 +290,7 @@ var ChatSystem = React.createClass({
     socket.on('add user', this.addUser);
     socket.on('remove user', this.removeUser);
     socket.on('update users', this.updateUsers);
-    socket.on('new message', this.newMessage);
+    socket.on('new message', this.newMessageReceived);
 
     // If client is already registered, join the chat network
     if (this.state.name)
@@ -301,17 +304,18 @@ var ChatSystem = React.createClass({
     if (name === STORAGE_NAME_KEY)
       return;
 
-    if (isStorageSupported()) {
+    if (isStorageSupported())
       localStorage.setItem(STORAGE_NAME_KEY, name);
-      this.setState({name: name});
-      joinServer(name);
-    }
+
+    this.setState({name: name});
+    joinServer(name);
   },
   handleNewConversation: function(user) {
     // User has invalid name
     if (user === STORAGE_NAME_KEY)
       return;
 
+    // If a conversation with this user is not already open
     if (this.state.conversations.indexOf(user) < 0) {
       var newList = this.state.conversations.slice();
       newList.push(user);
@@ -330,8 +334,8 @@ var ChatSystem = React.createClass({
   isUserConnected: function(user) {
     if (this.state.users.indexOf(user) >= 0)
       return true;
-
-    return false;
+    else
+      return false;
   },
   render: function() {
     /**
@@ -345,7 +349,7 @@ var ChatSystem = React.createClass({
 
     var chatBoxes = this.state.conversations.map(function(friendName, index) {
       var message = latestMessage.friendName === friendName ?
-        latestMessage.message : '';
+                      latestMessage.message : '';
       var friendIsConnected = isUserConnected(friendName);
 
       return (

@@ -20,6 +20,10 @@
   overflow: scroll;
 }
 
+.close {
+  text-shadow: 0 1px 0 #bebebe;
+}
+
 .close:hover {
     opacity: .365;
 }

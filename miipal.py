@@ -109,4 +109,4 @@ def on_disconnect():
         users[user] = users[user] - 1
 
 if __name__ == '__main__':
-    socketio.run(app)
+    socketio.run(app, heartbeat_interval=.5)

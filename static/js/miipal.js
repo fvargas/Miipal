@@ -16,7 +16,7 @@ var NameForm = React.createClass({displayName: "NameForm",
       React.createElement("form", {className: "nameForm", onSubmit: this.handleSubmit}, 
         React.createElement("div", {className: "form-group"}, 
           React.createElement("label", {htmlFor: "name"}, "Name"), 
-          React.createElement("input", {type: "text", id: "name", className: "form-control", placeholder: "Po-Shen Loh", ref: "name", autoFocus: "autoFocus"})
+          React.createElement("input", {type: "text", id: "name", className: "form-control", placeholder: "Enter a username and press enter...", ref: "name", autoFocus: "autoFocus"})
         )
       )
     );

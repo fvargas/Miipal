@@ -16,7 +16,7 @@ var NameForm = React.createClass({
       <form className="nameForm" onSubmit={this.handleSubmit}>
         <div className="form-group">
           <label htmlFor="name">Name</label>
-          <input type="text" id="name" className="form-control" placeholder="Po-Shen Loh" ref="name" autoFocus="autoFocus" />
+          <input type="text" id="name" className="form-control" placeholder="Enter a username and press enter..." ref="name" autoFocus="autoFocus" />
         </div>
       </form>
     );

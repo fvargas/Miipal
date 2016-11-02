@@ -8,5 +8,6 @@ Miipal is implemented using the following technologies:
 - Flask-SocketIO (websockets)
 - Socket.io (websockets)
 
-### Run the server
-To run the server, simply execute the `run.sh` script.
+### Run the app
+To run the app, first install the dependencies found in `requirements.txt` (use of virtualenv is recommended).
+Then, simply execute the `run.sh` script and visit `127.0.0.1:5000`.
